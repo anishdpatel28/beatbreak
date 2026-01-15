@@ -4,23 +4,15 @@ A mouse-based rhythm game built in Unity where players hit approaching notes in 
 
 ## Getting Started
 
-**Clone the repository:**
-```bash
-git clone https://github.com/anishdpatel28/beatbreak.git
-```
-
-**Open in Unity Hub:**
-- Add project by selecting the cloned folder
-- Unity will import all packages and regenerate project files
-- First import may take a few minutes
-
-**Setup:**
-- See `GAME_GUIDE.md` for complete scene setup and level creation
+1. **Clone project**
+2. **Open Unity Hub** → Click **"Add"** → Select the Beatbreak folder
+3. **Open the project** (first time takes 2-5 minutes to import)
+4. **See `GAME_GUIDE.md`** for complete setup and level creation
 
 ## Requirements
 
-- Unity 6000.0 or 2022.3+ LTS
-- All required packages are defined in `Packages/manifest.json`
+- Unity 6000.0.x
+- All packages auto-installed from `Packages/manifest.json`
 
 ## Features
 
