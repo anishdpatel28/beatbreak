@@ -1,48 +1,67 @@
 # Beatbreak
 
-A mouse-based rhythm game built in Unity.
+A mouse-based rhythm game built in Unity where players hit approaching notes in sync with music.
 
-## For Your Friend: How to Import into Unity Hub
+## Getting Started
 
-1. **Clone the repository:**
-   ```bash
-   git clone https://github.com/anishdpatel28/beatbreak.git
-   ```
+**Clone the repository:**
+```bash
+git clone https://github.com/anishdpatel28/beatbreak.git
+```
 
-2. **Open Unity Hub**
+**Open in Unity Hub:**
+- Add project by selecting the cloned folder
+- Unity will import all packages and regenerate project files
+- First import may take a few minutes
 
-3. **Add the project:**
-   - Click "Add" (or "Open" in newer versions)
-   - Navigate to the cloned `beatbreak` folder
-   - Select the folder and confirm
-
-4. **Unity will open the project**
-   - Unity will automatically generate the Library and Temp folders
-   - This may take a few minutes on first import
-
-5. **Read GAME_GUIDE.md** for complete setup instructions
+**Setup:**
+- See `GAME_GUIDE.md` for complete scene setup and level creation
 
 ## Requirements
 
 - Unity 6000.0 or 2022.3+ LTS
-- Packages are automatically installed from manifest.json
+- All required packages are defined in `Packages/manifest.json`
 
-## What's Included
+## Features
 
-✓ Complete rhythm game code (18 C# scripts)  
-✓ Practice mode with checkpoints  
-✓ BPM-based timing system  
-✓ Data-driven levels (ScriptableObjects)  
-✓ Full documentation in GAME_GUIDE.md
+- BPM-based timing system using `AudioSettings.dspTime`
+- Practice mode with checkpoint system
+- Multiple difficulty settings with speed multipliers
+- Data-driven level design using ScriptableObjects
+- Complete scoring system (Perfect/Good/Miss)
+- 360° note approach directions
+- Built-in level editor helper
 
-## Getting Started
+## Controls
 
-See **GAME_GUIDE.md** for:
-- Unity scene setup
-- Creating levels
-- Gameplay controls
-- Troubleshooting
+| Action | Input |
+|--------|-------|
+| Move Cursor | Mouse |
+| Hit Note | Left Click |
+| Pause | ESC |
+| Create Checkpoint | Z |
+| Remove Checkpoint | X |
+| Navigate Checkpoints | [ / ] |
 
----
+## Documentation
 
-**Note:** The game code is complete. You just need to build the Unity scene following the guide.
+- `GAME_GUIDE.md` - Complete setup guide, level creation, and reference
+
+## Project Structure
+
+```
+Assets/
+├── Scripts/
+│   ├── Data/          # ScriptableObject definitions
+│   ├── Core/          # Timing and scoring systems
+│   ├── Gameplay/      # Game objects and mechanics
+│   ├── Practice/      # Checkpoint system
+│   ├── UI/            # User interface
+│   ├── Managers/      # Main game orchestration
+│   ├── Audio/         # Audio management
+│   └── Utilities/     # Helper tools
+├── Prefabs/
+├── Music/
+├── Levels/
+└── Difficulties/
+```

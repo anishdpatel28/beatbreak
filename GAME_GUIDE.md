@@ -1,279 +1,380 @@
-# Beatbreak - Game Guide
+# Beatbreak - Development Guide
 
-A mouse-based rhythm game where players hit approaching notes in sync with music.
-
----
-
-## Quick Start
-
-1. Create sprites (white squares)
-2. Create prefabs (HitObject, CheckpointMarker)
-3. Build the Unity scene (see hierarchy below)
-4. Create difficulty and level assets
-5. Connect references in GameplayManager
-6. Press Play!
+Complete reference for setting up and developing the rhythm game.
 
 ---
 
-## Unity Scene Hierarchy
+## Overview
 
-```
-Main Camera (Orthographic, Size: 10, Position: 0,0,-10)
-
-PlayerZone
-├─ Sprite Renderer (semi-transparent white)
-├─ Box Collider 2D
-└─ PlayerZone script
-
-HitObjectContainer (empty GameObject)
-
-CursorController
-└─ CursorController script
-
-NoteSpawner
-└─ NoteSpawner script
-
-PracticeManager
-└─ PracticeManager script
-
-MusicPlayer
-└─ AudioSource (Play On Awake: OFF, Loop: OFF)
-
-GameplayManager ⭐ MAIN - Connect ALL references here!
-└─ GameplayManager script
-
-GameplayCanvas
-├─ GameplayUI (script here - connect all child UI elements)
-├─ ScoreText (Top-Left)
-├─ ComboText (Center, initially disabled)
-├─ AccuracyText (Top-Right)
-├─ HitResultText (Center, initially disabled)
-├─ ProgressBar (Slider at top)
-│   ├─ Fill Image
-│   └─ CheckpointContainer (Panel, no Image)
-├─ PracticeModeText (Top-Center, yellow)
-├─ PracticeControlsPanel (Bottom-Right with controls text)
-└─ PauseMenuPanel (Full screen, initially disabled)
-
-ResultsCanvas (Initially DISABLED)
-└─ ResultsScreenUI (script here)
-    ├─ Score/Accuracy/Combo texts
-    └─ Retry/Menu buttons
-```
+Beatbreak is a mouse-based rhythm game with BPM-synchronized note spawning, practice mode with checkpoints, and a modular scoring system. All levels are data-driven using ScriptableObjects for easy version control and modification.
 
 ---
 
-## Required Prefabs
+## Scene Setup
 
-### HitObject Prefab (`Assets/Prefabs/`)
-- Sprite Renderer (white square)
+### Required GameObjects
+
+**Main Camera**
+- Projection: Orthographic
+- Size: 10
+- Position: (0, 0, -10)
+
+**PlayerZone**
+- Sprite Renderer (semi-transparent)
 - Box Collider 2D
-- HitObject script (assign SpriteRenderer and BoxCollider)
-  - Normal Color: White
-  - Hover Color: Yellow
-  - Hit Color: Green
-  - Miss Color: Red
+- PlayerZone component
 
-### CheckpointMarker Prefab (`Assets/Prefabs/`)
-- UI Image (yellow, size 4x30)
+**HitObjectContainer**
+- Empty GameObject (notes spawn as children)
+
+**CursorController**
+- CursorController component
+
+**NoteSpawner**
+- NoteSpawner component
+- Requires HitObject prefab
+
+**PracticeManager**
+- PracticeManager component
+
+**MusicPlayer**
+- AudioSource component
+- Play On Awake: disabled
+- Loop: disabled
+
+**GameplayManager**
+- GameplayManager component
+- Central orchestrator - all system references connect here
+
+### UI Hierarchy
+
+**GameplayCanvas**
+- Canvas (Screen Space - Overlay)
+- Canvas Scaler (Scale With Screen Size: 1920x1080)
+
+**UI Components:**
+- GameplayUI (main controller)
+- ScoreText (Top-Left anchor)
+- ComboText (Center anchor, disabled by default)
+- AccuracyText (Top-Right anchor)
+- HitResultText (Center anchor, disabled by default)
+- ProgressBar (Slider, top stretch anchor)
+  - Fill Image
+  - CheckpointContainer (Panel, stretch anchors)
+- PracticeModeText (Top-Center anchor)
+- PracticeControlsPanel (Bottom-Right anchor)
+- PauseMenuPanel (Stretch all, disabled by default)
+
+**ResultsCanvas**
+- Separate canvas, disabled by default
+- ResultsScreenUI component
+- Score statistics displays
+- Retry and Menu buttons
 
 ---
 
-## Creating Assets
+## Prefabs
+
+### HitObject
+- Sprite Renderer
+- Box Collider 2D
+- HitObject component
+  - Color settings: normal, hover, hit, miss
+
+### CheckpointMarker
+- UI Image (vertical line)
+- Size: 4x30
+- Color: Yellow
+
+---
+
+## Asset Creation
 
 ### Difficulty Settings
-Right-click in `Assets/Difficulties/` → Create → Beatbreak → Difficulty Settings
+`Create → Beatbreak → Difficulty Settings`
 
-**Recommended Presets:**
-- **Easy**: Speed 0.75x, Perfect 0.08s, Good 0.15s
-- **Normal**: Speed 1.0x, Perfect 0.05s, Good 0.10s
-- **Hard**: Speed 1.5x, Perfect 0.04s, Good 0.08s
-- **Expert**: Speed 2.0x, Perfect 0.03s, Good 0.06s
+**Properties:**
+- Speed Multiplier (0.25 - 3.0)
+- Perfect Window (seconds)
+- Good Window (seconds)
+- Scale Hit Windows With Speed (bool)
+
+**Preset Examples:**
+
+| Difficulty | Speed | Perfect | Good |
+|------------|-------|---------|------|
+| Easy       | 0.75x | 0.08s   | 0.15s |
+| Normal     | 1.0x  | 0.05s   | 0.10s |
+| Hard       | 1.5x  | 0.04s   | 0.08s |
+| Expert     | 2.0x  | 0.03s   | 0.06s |
 
 ### Level Data
-Right-click in `Assets/Levels/` → Create → Beatbreak → Level Data
+`Create → Beatbreak → Level Data`
 
-Set:
-- Song (AudioClip from `Assets/Music/`)
-- BPM (beats per minute of the song)
-- Default Approach Time: 1.0
-- Hit Objects (see below)
+**Properties:**
+- Song (AudioClip)
+- BPM (beats per minute)
+- Song Offset (sync adjustment)
+- Default Approach Time (note travel duration)
+- Hit Objects (list)
 
----
-
-## Creating Levels
-
-### Using LevelEditorHelper (Recommended)
-1. Attach `LevelEditorHelper` to any GameObject (e.g., PlayerZone)
-2. Assign your Level Data asset
-3. Set Current Beat (when to hit the note)
-4. Set Approach Angle (where it comes from)
-5. Right-click script → "Add Hit Object at Current Beat"
-6. Preview appears in Scene view
-
-### Manual Entry
-Expand Hit Objects list in Level Data, add entries with:
-- **Beat Time**: When to hit (in beats)
-- **Approach Angle**: Direction (0°=Right, 90°=Up, 180°=Left, 270°=Down)
-- **Speed Multiplier**: 1.0 (default)
-- **Size Multiplier**: 1.0 (default)
-
-### Beat Calculations (120 BPM example)
-```
-Beat 0 = 0.00s    Beat 4 = 2.00s    Beat 8 = 4.00s
-Beat 1 = 0.50s    Beat 5 = 2.50s    Beat 16 = 8.00s
-Beat 2 = 1.00s    Beat 6 = 3.00s
-
-Formula: seconds = beats × (60 / BPM)
-```
-
-### Simple Test Pattern (120 BPM)
-```
-Beat 0, Angle 0° (Right)      Beat 8, Angle 45° (Up-Right)
-Beat 1, Angle 90° (Up)        Beat 9, Angle 135° (Up-Left)
-Beat 2, Angle 180° (Left)     Beat 10, Angle 225° (Down-Left)
-Beat 3, Angle 270° (Down)     Beat 11, Angle 315° (Down-Right)
-Beat 4, Angle 0° (Right)      Beat 12, Angle 45° (Up-Right)
-Beat 5, Angle 90° (Up)        Beat 13, Angle 135° (Up-Left)
-Beat 6, Angle 180° (Left)     Beat 14, Angle 225° (Down-Left)
-Beat 7, Angle 270° (Down)     Beat 15, Angle 315° (Down-Right)
-```
+### Hit Object Definition
+- Beat Time (when to hit)
+- Approach Angle (0-360°)
+- Speed Multiplier (per-note modifier)
+- Size Multiplier (per-note scaling)
+- Position Offset (optional adjustment)
 
 ---
 
-## Gameplay Controls
+## Level Creation
 
-| Action | Key/Input |
-|--------|-----------|
-| Move Cursor | Mouse |
-| Hit Note | Left Click |
-| Pause | ESC |
-| Create Checkpoint | Z |
-| Remove Checkpoint | X |
-| Previous Checkpoint | [ |
-| Next Checkpoint | ] |
+### LevelEditorHelper Workflow
+1. Attach component to any GameObject
+2. Assign Level Data asset
+3. Configure Current Beat and Approach Angle
+4. Context menu: "Add Hit Object at Current Beat"
+5. Visual preview appears in Scene view
+
+### Beat Time Conversion
+```
+seconds = beats × (60 / BPM)
+
+Example at 120 BPM:
+Beat 0 = 0.00s    Beat 8 = 4.00s
+Beat 1 = 0.50s    Beat 16 = 8.00s
+Beat 4 = 2.00s    Beat 32 = 16.00s
+```
+
+### Angle Reference
+
+| Direction | Degrees |
+|-----------|---------|
+| Right     | 0°      |
+| Up-Right  | 45°     |
+| Up        | 90°     |
+| Up-Left   | 135°    |
+| Left      | 180°    |
+| Down-Left | 225°    |
+| Down      | 270°    |
+| Down-Right| 315°    |
+
+### Pattern Examples
+
+**Cardinal Cross**
+```
+Beat N+0: 0°, Beat N+1: 90°, Beat N+2: 180°, Beat N+3: 270°
+```
+
+**Diagonal Pattern**
+```
+Beat N+0: 45°, Beat N+1: 135°, Beat N+2: 225°, Beat N+3: 315°
+```
+
+**Circle (8 notes)**
+```
+0°, 45°, 90°, 135°, 180°, 225°, 270°, 315° at 0.5 beat intervals
+```
+
+**Alternating**
+```
+0°, 180°, 0°, 180° at 0.5 beat intervals
+```
 
 ---
 
-## GameplayManager Setup (CRITICAL!)
+## Component Reference
 
-This is the main component - must assign ALL references:
+### TimingSystem
+- BPM-based timing using `AudioSettings.dspTime`
+- Handles beat/second conversions
+- Supports speed multipliers
+- Checkpoint offset support
+
+**Key Methods:**
+- `Initialize(LevelData, DifficultySettings)`
+- `StartTiming()` / `StartTimingFromOffset(float)`
+- `BeatsToSeconds(float)` / `SecondsToBeats(float)`
+
+**Properties:**
+- `CurrentSongTime` (seconds)
+- `CurrentBeat` (calculated from song time)
+- `BeatDuration` (seconds per beat)
+
+### ScoringSystem
+- Hit evaluation (Perfect/Good/Miss)
+- Score and combo tracking
+- Accuracy calculation
+
+**Key Methods:**
+- `Initialize(DifficultySettings)`
+- `EvaluateHit(float timingError)` → HitResult
+- `RegisterHit(HitResult)`
+- `GetScoreData()` → ScoreData
+
+**Events:**
+- `OnHit(HitResult, int score)`
+- `OnComboChanged(int combo)`
+- `OnScoreChanged(int score)`
+
+### NoteSpawner
+- Spawns notes based on timing
+- Manages active note pool
+- Checkpoint support
+
+**Key Methods:**
+- `Initialize(LevelData, TimingSystem)`
+- `UpdateSpawner()` (call per frame)
+- `ClearAllHitObjects()`
+- `ResetToIndex(int)` (for checkpoints)
+
+### GameplayManager
+Main orchestrator connecting all systems.
+
+**Required References:**
+- Level Data, Difficulty Settings
+- Audio Source, Note Spawner
+- Player Zone, Cursor Controller
+- Practice Manager, Gameplay UI, Results Screen
+
+**Key Methods:**
+- `StartLevel(LevelData, DifficultySettings)`
+- `RestartLevel()`
+- `TogglePause()`
+
+### PracticeManager
+Checkpoint system for practice mode.
+
+**Key Methods:**
+- `CreateCheckpoint()` (Z key)
+- `RemoveLatestCheckpoint()` (X key)
+- `GoToPreviousCheckpoint()` / `GoToNextCheckpoint()` ([ / ] keys)
+- `RestartFromCheckpoint(CheckpointData)`
+
+**Events:**
+- `OnCheckpointCreated(CheckpointData)`
+- `OnCheckpointRemoved(int index)`
+- `OnCheckpointActivated(CheckpointData)`
+
+---
+
+## Configuration
+
+### GameplayManager Inspector
+Critical component - all references must be assigned:
 
 **Level Settings:**
-- Level Data → your Level asset
-- Difficulty Settings → your Difficulty asset
+- Level Data (ScriptableObject)
+- Difficulty Settings (ScriptableObject)
 
-**References:**
+**System References:**
 - Audio Source → MusicPlayer
 - Note Spawner → NoteSpawner
 - Player Zone → PlayerZone
 - Cursor Controller → CursorController
 - Practice Manager → PracticeManager
-- Gameplay UI → GameplayUI (on Canvas)
-- Results Screen → ResultsScreenUI (on ResultsCanvas)
+- Gameplay UI → GameplayUI
+- Results Screen → ResultsScreenUI
 
-**Settings:**
-- Pause Key: Escape
+### UI Component Setup
+
+**GameplayUI:**
+- Assign all text elements (Score, Combo, Accuracy, Hit Result)
+- Progress Bar component reference
+- Practice mode UI elements
+- Pause menu panel
+
+**ProgressBarUI:**
+- Fill Image (Slider's Fill child)
+- Checkpoint Container (Panel)
+- Checkpoint Marker Prefab
+
+**ResultsScreenUI:**
+- All score text fields
+- Button references (Retry, Menu)
 
 ---
 
-## UI Setup Details
+## Controls
 
-### GameplayUI Script (on Canvas/GameplayUI)
-Assign all child text elements:
-- Score Text, Combo Text, Accuracy Text, Hit Result Text
-- Progress Bar (ProgressBarUI component)
-- Practice Mode Text, Practice Controls Panel, Pause Menu Panel
-
-### ProgressBarUI Script (on ProgressBar)
-- Fill Image → Drag the Fill child
-- Checkpoint Container → Drag CheckpointContainer child
-- Checkpoint Marker Prefab → Drag your prefab
-
-### ResultsScreenUI Script (on ResultsCanvas)
-- Assign all score text fields
-- Assign Retry and Menu buttons
+| Input | Action |
+|-------|--------|
+| Mouse Movement | Cursor control |
+| Left Click | Hit note (when in player zone) |
+| ESC | Pause/Unpause |
+| Z | Create checkpoint (practice mode) |
+| X | Remove latest checkpoint |
+| [ | Previous checkpoint |
+| ] | Next checkpoint |
 
 ---
 
 ## Troubleshooting
 
-**Notes don't appear:**
-- Check HitObject prefab assigned to NoteSpawner
-- Verify Camera is Orthographic
-- Check spawn distance (default: 10)
+### Notes Not Appearing
+- Verify HitObject prefab assigned in NoteSpawner
+- Check Camera projection (must be Orthographic)
+- Confirm spawn distance is within camera view
 
-**Can't hit notes:**
-- Ensure Box Collider 2D is on HitObject prefab
-- Verify PlayerZone has collider
+### Hit Detection Issues
+- Ensure Box Collider 2D exists on HitObject
+- Verify PlayerZone has collider component
+- Check cursor layer mask settings
 
-**Audio out of sync:**
-- Adjust "Song Offset" in Level Data
-- Positive offset = delay start
-- Negative offset = start early
+### Audio Synchronization
+- Adjust Song Offset in Level Data
+  - Positive values delay the start
+  - Negative values advance the start
+- Use practice mode to identify timing drift
 
-**Hit timing feels off:**
-- Adjust Perfect/Good windows in Difficulty Settings
-- Enable "Scale Hit Windows With Speed" for consistency
+### Hit Window Feel
+- Modify Perfect/Good windows in Difficulty Settings
+- Enable "Scale Hit Windows With Speed" for consistent timing across speeds
 
-**TextMeshPro missing:**
-- Window → TextMeshPro → Import TMP Essential Resources
-
----
-
-## Code Architecture
-
-### Core Systems
-- **TimingSystem**: BPM-based timing using `AudioSettings.dspTime`
-- **ScoringSystem**: Hit evaluation (Perfect/Good/Miss) and score tracking
-- **NoteSpawner**: Spawns notes based on beat timing
-- **PracticeManager**: Checkpoint system for practice mode
-
-### Data (ScriptableObjects)
-- **LevelData**: Song, BPM, hit objects
-- **DifficultySettings**: Speed multiplier, hit windows
-- **HitObjectData**: Individual note properties
-
-### Gameplay Components
-- **HitObject**: Note movement and hit detection
-- **PlayerZone**: Center hit area (boss mechanics ready via `SetZoneSize()`)
-- **CursorController**: Mouse tracking and hover detection
-- **GameplayManager**: Main orchestrator
+### Missing TextMeshPro
+- Import via Window → TextMeshPro → Import TMP Essential Resources
 
 ---
 
-## Pattern Ideas
+## Architecture
 
-**Cardinal Cross:**
-0°, 90°, 180°, 270° (one beat apart)
+### Data Flow
+```
+LevelData + DifficultySettings
+        ↓
+   GameplayManager
+        ↓
+   ┌────┴────┬────────┬──────────┐
+   ↓         ↓        ↓          ↓
+Timing   Scoring   Spawner   Practice
+   ↓         ↓        ↓          ↓
+   └─────────┴────────┴──────────┘
+              ↓
+         GameplayUI
+```
 
-**Diagonal X:**
-45°, 135°, 225°, 315° (one beat apart)
+### Event System
+- Scoring events trigger UI updates
+- Practice mode events update progress bar
+- Hit detection uses direct component communication
+- Manager orchestrates system lifecycle
 
-**Circle (8 notes):**
-0°, 45°, 90°, 135°, 180°, 225°, 270°, 315° (0.5 beats apart)
+### Extension Points
 
-**Alternating:**
-0°, 180°, 0°, 180° (0.5 beats apart)
+**Visual Effects:**
+Subscribe to `ScoringSystem.OnHit` for particle systems or screen effects
 
-**Spiral:**
-0°, 90°, 180°, 270° (0.25 beats apart)
+**New Note Types:**
+Inherit from `HitObject` and override movement/detection methods
 
----
+**Boss Mechanics:**
+Use `PlayerZone.SetZoneSize(Vector2)` for dynamic play area
 
-## Extending the Game
+**Custom Scoring:**
+Modify score constants in `ScoringSystem` or extend evaluation logic
 
-### Add Visual Effects
-Subscribe to `ScoringSystem.OnHit` event for particles/screen shake
-
-### Create New Note Types
-Inherit from `HitObject` and override methods
-
-### Boss Mechanics
-Use `PlayerZone.SetZoneSize(newSize)` to dynamically change play area
-
-### Custom Scoring
-Modify constants in `ScoringSystem` (PERFECT_SCORE, GOOD_SCORE, etc.)
+**Audio Effects:**
+Extend `AudioManager` for hit sounds or music filters
 
 ---
 
@@ -282,49 +383,40 @@ Modify constants in `ScoringSystem` (PERFECT_SCORE, GOOD_SCORE, etc.)
 ```
 Assets/
 ├── Scripts/
-│   ├── Data/           (ScriptableObjects)
-│   ├── Core/           (Timing, Scoring)
-│   ├── Gameplay/       (HitObject, Spawner, PlayerZone, Cursor)
-│   ├── Practice/       (PracticeManager)
-│   ├── UI/             (UI components)
-│   ├── Managers/       (GameplayManager)
-│   ├── Audio/          (AudioManager)
-│   └── Utilities/      (Helpers)
-├── Prefabs/
-├── Music/
-├── Levels/
-├── Difficulties/
-└── Scenes/
+│   ├── Data/           # ScriptableObject definitions
+│   ├── Core/           # Timing, scoring, hit results
+│   ├── Gameplay/       # HitObject, spawner, player zone, cursor
+│   ├── Practice/       # Checkpoint system
+│   ├── UI/             # Gameplay UI, progress bar, results
+│   ├── Managers/       # Main game orchestration
+│   ├── Audio/          # Audio control and management
+│   └── Utilities/      # Level editor helper, beat calculator
+├── Prefabs/            # Reusable GameObjects
+├── Music/              # Audio files
+├── Levels/             # Level ScriptableObjects
+├── Difficulties/       # Difficulty ScriptableObjects
+└── Scenes/             # Unity scenes
 ```
 
 ---
 
-## Common Angles Reference
+## Development Workflow
 
-| Direction | Angle |
-|-----------|-------|
-| Right     | 0°    |
-| Up-Right  | 45°   |
-| Up        | 90°   |
-| Up-Left   | 135°  |
-| Left      | 180°  |
-| Down-Left | 225°  |
-| Down      | 270°  |
-| Down-Right| 315°  |
+1. Import audio to Music folder
+2. Create Difficulty preset(s)
+3. Create Level Data with BPM
+4. Use LevelEditorHelper to place notes
+5. Test with simple patterns first
+6. Adjust song offset if needed
+7. Iterate on note placement
+8. Create additional difficulties by duplicating settings
 
 ---
 
-## Tips
+## Performance Notes
 
-- Start with 120 BPM songs (easy math)
-- Use Practice Mode (Z key) when testing
-- Place notes on whole beats for easy levels
-- Use half beats (0.5) for medium difficulty
-- Use quarter beats (0.25) for hard sections
-- Test with a simple 10-20 note level first
-- Adjust song offset if timing feels consistently off
-- Enable Practice Mode initially for easier testing
-
----
-
-That's it! Build the scene, assign references, and press Play. 🎮
+- Note spawning is optimized for single-frame checks
+- Active note pool is minimal (only visible notes)
+- UI updates are event-driven (not per-frame)
+- Audio uses streaming for large files
+- Consider object pooling for production builds with many simultaneous notes
