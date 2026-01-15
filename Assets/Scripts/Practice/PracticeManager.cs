@@ -2,6 +2,7 @@ using UnityEngine;
 using System.Collections.Generic;
 using Beatbreak.Data;
 using Beatbreak.Core;
+using Beatbreak.Gameplay;
 
 namespace Beatbreak.Practice
 {
