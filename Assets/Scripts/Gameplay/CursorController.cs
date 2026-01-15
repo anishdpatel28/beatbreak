@@ -11,10 +11,6 @@ namespace Beatbreak.Gameplay
         [Header("References")]
         [SerializeField] private Camera mainCamera;
         
-        [Header("Detection Settings")]
-        [SerializeField] private LayerMask hitObjectLayer;
-        [SerializeField] private float detectionRadius = 0.1f;
-        
         private Vector2 cursorWorldPosition;
         private HitObject currentlyHoveredObject;
         private List<HitObject> allActiveHitObjects = new List<HitObject>();
